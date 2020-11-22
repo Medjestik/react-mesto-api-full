@@ -50,7 +50,12 @@ module.exports.createCard = (req, res) => {
 module.exports.deleteCard = (req, res) => {
   Card.findByIdAndRemove(req.params.id)
     .then((card) => {
-      res
+      if (card.owner.toString() !== req.user._id) {
+        return res
+          .status(403)
+          .send({ message: 'Нельзя удалять карточки других пользователей' });
+      }
+      return res
         .status(200)
         .send(card);
     })

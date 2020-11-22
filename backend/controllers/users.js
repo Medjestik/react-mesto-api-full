@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -18,6 +19,25 @@ module.exports.getUsers = (req, res) => {
 
 module.exports.getUser = (req, res) => {
   User.findById(req.params.id)
+    .then((user) => {
+      res
+        .status(200)
+        .send(user);
+    })
+    .catch((err) => {
+      if (err.name === 'CastError') {
+        return res
+          .status(404)
+          .send({ message: 'Нет пользователя с таким id' });
+      }
+      return res
+        .status(500)
+        .send({ message: 'Internal Server Error' });
+    });
+};
+
+module.exports.getUserByToken = (req, res) => {
+  User.findById(req.user._id)
     .then((user) => {
       res
         .status(200)
@@ -118,5 +138,24 @@ module.exports.editAvatar = (req, res) => {
       return res
         .status(500)
         .send({ message: 'Internal Server Error' });
+    });
+};
+
+module.exports.login = (req, res) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sing(
+        { _id: user._id },
+        'some-secret-key',
+        { expressIn: '7d' },
+      );
+      res.send({ token });
+    })
+    .catch((err) => {
+      res
+        .status(401)
+        .send({ message: err.message });
     });
 };

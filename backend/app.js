@@ -21,8 +21,8 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-app.post('./signin', login);
-app.post('./signup', createUser);
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 app.use('/cards', auth, cardsRouter);
 app.use('/users', auth, usersRouter);

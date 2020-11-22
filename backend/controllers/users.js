@@ -149,7 +149,7 @@ module.exports.login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sing(
+      const token = jwt.sign(
         { _id: user._id },
         'some-secret-key',
         { expressIn: '7d' },

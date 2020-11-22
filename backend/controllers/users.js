@@ -56,14 +56,17 @@ module.exports.getUserByToken = (req, res) => {
 };
 
 module.exports.createUser = (req, res) => {
-  bcrypt.hash(req.body.password, 10)
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
+  bcrypt.hash(password, 10)
     .then((hash) => {
       User.create({
-        name: req.body.name,
-        email: req.body.email,
+        name,
+        about,
+        avatar,
+        email,
         password: hash,
-        about: req.body.about,
-        avatar: req.body.avatar,
       })
         .then((user) => {
           res

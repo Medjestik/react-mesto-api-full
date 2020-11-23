@@ -18,7 +18,7 @@ const usersRouter = require('./routes/users').router;
 const { createUser, login } = require('./controllers/users.js');
 const auth = require('./middlewares/auth.js');
 
-app.use((req, res, next) => {
+/*app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
   res.header(
     'Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept',
@@ -26,7 +26,7 @@ app.use((req, res, next) => {
   res.header('Access-Control-Allow-Methods', 'GET,PUT,PATCH,POST,DELETE');
 
   next();
-});
+});*/
 
 app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
@@ -37,7 +37,7 @@ app.post('/signin', login);
 app.post('/signup', createUser);
 
 app.use('/cards', auth, cardsRouter);
-app.use('/users', usersRouter);
+app.use('/users', auth, usersRouter);
 
 app.all('*', (req, res) => {
   res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });

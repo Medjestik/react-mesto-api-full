@@ -1,6 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 
 const app = express();
 
@@ -18,6 +19,7 @@ const { createUser, login } = require('./controllers/users.js');
 const auth = require('./middlewares/auth.js');
 
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

@@ -18,8 +18,18 @@ const usersRouter = require('./routes/users').router;
 const { createUser, login } = require('./controllers/users.js');
 const auth = require('./middlewares/auth.js');
 
-app.use(express.static(path.join(__dirname, 'public')));
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*');
+  res.header(
+    'Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept',
+  );
+  res.header('Access-Control-Allow-Methods', 'GET,PUT,PATCH,POST,DELETE');
+
+  next();
+});
+
 app.use(cors());
+app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 

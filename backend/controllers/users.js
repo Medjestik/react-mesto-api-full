@@ -18,12 +18,16 @@ module.exports.getUserById = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.getUserByToken = (req, res, next) => {
-  User.findById(req.user._id)
-    .orFail(new NotFoundError('Пользователь не найден'))
-    .then((user) => res.send(user))
-    .catch(next);
-};
+module.exports.getUserByToken = (req, res, next) => User
+  .findOne({ _id: req.params.userId })
+  .then((user) => {
+    if (!user) {
+      throw new NotFoundError('Нет пользователя с таким id');
+    }
+
+    res.send(user);
+  })
+  .catch(next); // добавили catch
 
 module.exports.createUser = (req, res) => {
   const {

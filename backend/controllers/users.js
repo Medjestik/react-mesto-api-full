@@ -17,8 +17,9 @@ module.exports.getUsers = (req, res) => {
     });
 };
 
-module.exports.getUser = (req, res) => {
-  User.find({})
+module.exports.getUserById = (req, res) => {
+  const { userId } = req.params;
+  User.findById(userId)
     .then((user) => {
       res
         .status(200)
@@ -37,7 +38,8 @@ module.exports.getUser = (req, res) => {
 };
 
 module.exports.getUserByToken = (req, res) => {
-  User.findById(req.user._id)
+  const { _id: userId } = req.user;
+  User.findById(userId)
     .then((user) => {
       res
         .status(200)

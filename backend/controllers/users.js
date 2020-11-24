@@ -6,17 +6,7 @@ const UnauthorizedError = require('../errors/unauthorized-error.js');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((data) => {
-      if (!data) {
-        res
-          .status(500)
-          .send({ message: 'Internal Server Error' });
-        return;
-      }
-      res
-        .status(200)
-        .send(data);
-    })
+    .then((users) => res.send({ data: users }))
     .catch(next);
 };
 

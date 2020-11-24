@@ -5,6 +5,12 @@ const cors = require('cors');
 
 const app = express();
 const { PORT = 3000 } = process.env;
+const path = require('path');
+const cardsRouter = require('./routes/cards').router;
+const usersRouter = require('./routes/users').router;
+const { createUser, login } = require('./controllers/users.js');
+const auth = require('./middlewares/auth.js');
+const NotFoundError = require('./errors/not-found-err.js');
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
@@ -12,13 +18,6 @@ mongoose.connect('mongodb://localhost:27017/mestodb', {
   useCreateIndex: true,
   useFindAndModify: false,
 });
-
-const path = require('path');
-const cardsRouter = require('./routes/cards').router;
-const usersRouter = require('./routes/users').router;
-const { createUser, login } = require('./controllers/users.js');
-const auth = require('./middlewares/auth.js');
-const NotFoundError = require('./errors/not-found-err.js');
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');

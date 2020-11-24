@@ -6,48 +6,23 @@ const UnauthorizedError = require('../errors/unauthorized-error.js');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((users) => res.send(users))
     .catch(next);
 };
 
-module.exports.getUserById = (req, res) => {
-  const { userId } = req.params;
-  User.findById(userId)
-    .then((user) => {
-      res
-        .status(200)
-        .send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res
-          .status(404)
-          .send({ message: 'Нет пользователя с таким id' });
-      }
-      return res
-        .status(500)
-        .send({ message: 'Internal Server Error' });
-    });
+module.exports.getUserById = (req, res, next) => {
+  const { id } = req.params;
+  User.findById(id)
+    .orFail(new NotFoundError('Пользователь не найден'))
+    .then((user) => res.send(user))
+    .catch(next);
 };
 
-module.exports.getUserByToken = (req, res) => {
-  const { _id: userId } = req.user;
-  User.findById(userId)
-    .then((user) => {
-      res
-        .status(200)
-        .send(user);
-    })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res
-          .status(404)
-          .send({ message: 'Нет пользователя с таким id' });
-      }
-      return res
-        .status(500)
-        .send({ message: 'Internal Server Error' });
-    });
+module.exports.getUserByToken = (req, res, next) => {
+  User.findById(req.user._id)
+    .orFail(new NotFoundError('Пользователь не найден'))
+    .then((user) => res.send(user))
+    .catch(next);
 };
 
 module.exports.createUser = (req, res) => {
@@ -81,52 +56,37 @@ module.exports.createUser = (req, res) => {
     });
 };
 
-module.exports.editProfile = (req, res) => {
-  const { _id: userId } = req.user;
+module.exports.editProfile = (req, res, next) => {
   const {
     name, about,
   } = req.body;
 
-  User.findByIdAndUpdate(userId, {
+  User.findByIdAndUpdate(req.user._id, {
     name, about,
   }, {
-    new: true, // обработчик then получит на вход обновлённую запись
-    runValidators: true, // данные будут валидированы перед изменением
+    new: true,
+    runValidators: true,
+    upsert: true,
   })
-    .then((user) => {
-      res
-        .status(200)
-        .send({ data: user });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({ message: 'Некорректные данные' });
-      }
-      return res
-        .status(500)
-        .send({ message: 'Internal Server Error' });
-    });
+    .orFail(new NotFoundError('Пользователь не найден'))
+    .then((user) => res.send(user))
+    .catch(next);
 };
 
 module.exports.editAvatar = (req, res, next) => {
   const {
-    _id: userId,
-  } = req.user;
-  const {
     avatar,
   } = req.body;
 
-  User.findByIdAndUpdate(userId, {
+  User.findByIdAndUpdate(req.user._id, {
     avatar,
   }, {
-    new: true, // обработчик then получит на вход обновлённую запись
-    runValidators: true, // данные будут валидированы перед изменением
-    upsert: true, // если пользователь не найден, он будет создан
+    new: true,
+    runValidators: true,
+    upsert: true,
   })
-    .onFail(new NotFoundError())
-    .then((user) => res.send({ data: user }))
+    .orFail(new NotFoundError('Пользователь не найден'))
+    .then((user) => res.send(user))
     .catch(next);
 };
 

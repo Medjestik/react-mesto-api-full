@@ -2,9 +2,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 
-const { TOKEN_SECRET_KEY = 'token-secret-key' } = process.env;
-
-module.exports.getUsers = (req, res) => {
+module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((data) => {
       if (!data) {
@@ -16,7 +14,8 @@ module.exports.getUsers = (req, res) => {
       res
         .status(200)
         .send(data);
-    });
+    })
+    .catch(next);
 };
 
 module.exports.getUserById = (req, res) => {
@@ -155,7 +154,7 @@ module.exports.login = (req, res) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        TOKEN_SECRET_KEY,
+        'some-secret-key',
         { expiresIn: '7d' },
       );
       res.send({ token });

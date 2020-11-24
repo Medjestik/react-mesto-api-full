@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const cors = require('cors');
 
 const app = express();
+const { PORT = 3000 } = process.env;
 
 mongoose.connect('mongodb://localhost:27017/mestodb', {
   useUnifiedTopology: true,
@@ -17,6 +18,7 @@ const cardsRouter = require('./routes/cards').router;
 const usersRouter = require('./routes/users').router;
 const { createUser, login } = require('./controllers/users.js');
 const auth = require('./middlewares/auth.js');
+const NotFoundError = require('./errors/not-found-err.js');
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -36,11 +38,21 @@ app.post('/signup', createUser);
 app.use('/cards', auth, cardsRouter);
 app.use('/users', auth, usersRouter);
 
-app.all('*', (req, res) => {
-  res.status(404).send({ message: 'Запрашиваемый ресурс не найден' });
+app.all('*', (req, res, next) => {
+  next(new NotFoundError('Запрашиваемый ресурс не найден'));
 });
 
-const { PORT = 3000 } = process.env;
+app.use((err, req, res, next) => {
+  const { statusCode = 500, message } = err;
+  res
+    .status(statusCode)
+    .send({
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  next();
+});
 
 app.listen(PORT, () => {
   console.log(`Ссылка на сервер - http://localhost:${PORT}`);

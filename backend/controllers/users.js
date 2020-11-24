@@ -81,12 +81,33 @@ module.exports.createUser = (req, res) => {
     });
 };
 
-module.exports.updateUser = (req, res, next) => {
+module.exports.editProfile = (req, res) => {
   const { _id: userId } = req.user;
-  const { name, about } = req.body;
-  User.findByIdAndUpdate(userId, { name, about }, { new: true, runValidators: true })
-    .then((user) => res.send({ data: user }))
-    .catch(next);
+  const {
+    name, about,
+  } = req.body;
+
+  User.findByIdAndUpdate(userId, {
+    name, about,
+  }, {
+    new: true, // обработчик then получит на вход обновлённую запись
+    runValidators: true, // данные будут валидированы перед изменением
+  })
+    .then((user) => {
+      res
+        .status(200)
+        .send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res
+          .status(400)
+          .send({ message: 'Некорректные данные' });
+      }
+      return res
+        .status(500)
+        .send({ message: 'Internal Server Error' });
+    });
 };
 
 module.exports.editAvatar = (req, res, next) => {

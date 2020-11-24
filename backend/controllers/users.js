@@ -1,6 +1,8 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const NotFoundError = require('../errors/not-found-err.js');
+const UnauthorizedError = require('../errors/unauthorized-error.js');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -118,39 +120,30 @@ module.exports.editProfile = (req, res) => {
     });
 };
 
-module.exports.editAvatar = (req, res) => {
+module.exports.editAvatar = (req, res, next) => {
+  const {
+    _id: userId,
+  } = req.user;
   const {
     avatar,
   } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, {
+  User.findByIdAndUpdate(userId, {
     avatar,
   }, {
     new: true, // обработчик then получит на вход обновлённую запись
     runValidators: true, // данные будут валидированы перед изменением
     upsert: true, // если пользователь не найден, он будет создан
   })
-    .then((user) => {
-      res
-        .status(200)
-        .send({ data: user });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({ message: 'Некорректные данные' });
-      }
-      return res
-        .status(500)
-        .send({ message: 'Internal Server Error' });
-    });
+    .onFail(new NotFoundError())
+    .then((user) => res.send({ data: user }))
+    .catch(next);
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
-  return User.findUserByCredentials(email, password)
+  User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
@@ -159,9 +152,7 @@ module.exports.login = (req, res) => {
       );
       res.send({ token });
     })
-    .catch((err) => {
-      res
-        .status(401)
-        .send({ message: err.message });
+    .catch(() => {
+      next(new UnauthorizedError('Неверный email или пароль'));
     });
 };

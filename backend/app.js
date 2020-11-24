@@ -35,8 +35,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/signin', login);
 app.post('/signup', createUser);
 
-app.use('/cards', auth, cardsRouter);
-app.use('/users', auth, usersRouter);
+app.use('/cards', cardsRouter);
+app.use('/users', usersRouter);
 
 app.all('*', (req, res, next) => {
   next(new NotFoundError('Запрашиваемый ресурс не найден'));

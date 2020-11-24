@@ -17,16 +17,10 @@ const path = require('path');
 const cardsRouter = require('./routes/cards').router;
 const usersRouter = require('./routes/users').router;
 const { createUser, login } = require('./controllers/users.js');
+const auth = require('./middlewares/auth.js');
+const NotFoundError = require('./errors/not-found-err.js');
 
 
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Credentials', true);
-  res.header('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Origin,X-Requested-With,Content-Type,Accept,content-type,application/json');
-  next();
-});
-app.use(cors());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -34,11 +28,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.post('/signin', login);
 app.post('/signup', createUser);
 
-app.use('/cards', cardsRouter);
-app.use('/users', usersRouter);
+app.use('/cards', auth, cardsRouter);
+app.use('/users', auth, usersRouter);
 
-app.all('*', (req, res) => {
-  res.status(404).send({ message: 'Ошибка тут' });
+app.all('*', (req, res, next) => {
+  next(new NotFoundError('Запрашиваемый ресурс не найден'));
 });
 
 app.use((err, req, res, next) => {

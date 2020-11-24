@@ -82,16 +82,16 @@ module.exports.createUser = (req, res) => {
 };
 
 module.exports.editProfile = (req, res) => {
+  const { _id: userId } = req.user;
   const {
     name, about,
   } = req.body;
 
-  User.findByIdAndUpdate(req.user._id, {
+  User.findByIdAndUpdate(userId, {
     name, about,
   }, {
     new: true, // обработчик then получит на вход обновлённую запись
     runValidators: true, // данные будут валидированы перед изменением
-    upsert: true, // если пользователь не найден, он будет создан
   })
     .then((user) => {
       res

@@ -17,8 +17,7 @@ const path = require('path');
 const cardsRouter = require('./routes/cards').router;
 const usersRouter = require('./routes/users').router;
 const { createUser, login } = require('./controllers/users.js');
-const auth = require('./middlewares/auth.js');
-const NotFoundError = require('./errors/not-found-err.js');
+
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -38,8 +37,8 @@ app.post('/signup', createUser);
 app.use('/cards', cardsRouter);
 app.use('/users', usersRouter);
 
-app.all('*', (req, res, next) => {
-  next(new NotFoundError('Запрашиваемый ресурс не найден'));
+app.all('*', (req, res) => {
+  res.status(404).send({ message: 'Ошибка тут' });
 });
 
 app.use((err, req, res, next) => {

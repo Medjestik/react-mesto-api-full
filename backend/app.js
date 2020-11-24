@@ -37,8 +37,8 @@ app.post('/signup', createUser);
 app.use('/cards', auth, cardsRouter);
 app.use('/users', auth, usersRouter);
 
-app.all('*', (req, res, next) => {
-  next(new NotFoundError('Запрашиваемый ресурс не найден'));
+app.use(() => {
+  throw new NotFoundError('херня');
 });
 
 app.use((err, req, res, next) => {

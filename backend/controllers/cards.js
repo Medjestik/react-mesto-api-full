@@ -1,21 +1,15 @@
 const Card = require('../models/card');
+const NotFoundError = require('../errors/not-found-err.js');
+const BadRequestError = require('../errors/bad-request-err.js');
+const ForbiddenError = require('../errors/forbidden-error.js');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
-    .then((data) => {
-      if (!data) {
-        res
-          .status(500)
-          .send({ message: 'Internal Server Error' });
-        return;
-      }
-      res
-        .status(200)
-        .send(data);
-    });
+    .then((cards) => res.send(cards))
+    .catch(next);
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const {
     name, link, likes, createdAt,
   } = req.body;
@@ -24,83 +18,49 @@ module.exports.createCard = (req, res) => {
   Card.create({
     name, link, owner, likes, createdAt,
   })
-    .then((card) => {
-      if (!card) {
-        res
-          .status(500)
-          .send({ message: 'Internal Server Error' });
-        return;
-      }
-      res
-        .status(200)
-        .send(card);
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({ message: 'Некорректные данные' });
-      }
-      return res
-        .status(500)
-        .send({ message: 'Internal Server Error' });
-    });
+    .then((card) => res.send(card))
+    .catch(() => next(new BadRequestError()));
 };
 
-module.exports.deleteCard = (req, res) => {
-  Card.findByIdAndRemove(req.params.id)
+module.exports.deleteCard = (req, res, next) => {
+  const { id } = req.params;
+  Card.findById(id)
+    .orFail(new NotFoundError('Карточка не найдена'))
     .then((card) => {
-      if (card.owner.toString() !== req.user._id) {
-        return res
-          .status(403)
-          .send({ message: 'Нельзя удалять карточки других пользователей' });
+      if (card.owner.toString() === req.user._id) {
+        card.remove()
+          .then((removeCard) => res.send(removeCard));
+      } else {
+        throw new ForbiddenError('Вы не можете удалять чужие карточки');
       }
-      return res
-        .status(200)
-        .send(card);
     })
-    .catch((err) => {
-      if (err.name === 'CastError') {
-        return res
-          .status(404)
-          .send({ message: 'Нет карточки с таким id' });
-      }
-      return res
-        .status(500)
-        .send({ message: 'Internal Server Error' });
-    });
+    .catch(next);
 };
 
-module.exports.likeCard = (req, res) => Card.findByIdAndUpdate(
-  req.params.id,
-  { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
-  { new: true },
-)
-  .then((card) => {
-    res
-      .status(200)
-      .send({ data: card });
-  })
-  .catch((err) => {
-    console.log(err.name);
-    return res
-      .status(500)
-      .send({ message: 'Internal Server Error' });
-  });
+module.exports.likeCard = (req, res, next) => {
+  const { id } = req.params;
+  Card.findByIdAndUpdate(
+    id,
+    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+    { new: true },
+  )
+    .orFail(new NotFoundError('Карточка не найдена'))
+    .then((card) => {
+      res.send(card);
+    })
+    .catch(next);
+};
 
-module.exports.dislikeCard = (req, res) => Card.findByIdAndUpdate(
-  req.params.id,
-  { $pull: { likes: req.user._id } }, // убрать _id из массива
-  { new: true },
-)
-  .then((card) => {
-    res
-      .status(200)
-      .send({ data: card });
-  })
-  .catch((err) => {
-    console.log(err.name);
-    return res
-      .status(500)
-      .send({ message: 'Internal Server Error' });
-  });
+module.exports.dislikeCard = (req, res, next) => {
+  const { id } = req.params;
+  Card.findByIdAndUpdate(
+    id,
+    { $pull: { likes: req.user._id } }, // убрать _id из массива
+    { new: true },
+  )
+    .orFail(new NotFoundError('Карточка не найдена'))
+    .then((card) => {
+      res.send(card);
+    })
+    .catch(next);
+};

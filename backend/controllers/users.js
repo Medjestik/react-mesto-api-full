@@ -19,7 +19,7 @@ module.exports.getUserById = (req, res, next) => {
 };
 
 module.exports.getUserByToken = (req, res, next) => {
-  User.findOne({ _id: req.params.userId })
+  User.findById(req.user._id)
     .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => res.send(user))
     .catch(next);

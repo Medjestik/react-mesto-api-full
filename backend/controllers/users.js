@@ -97,12 +97,10 @@ module.exports.login = (req, res, next) => {
     .then((user) => {
       const token = jwt.sign(
         { _id: user._id },
-        'some-secret-key',
+        process.env.JWT_TOKEN,
         { expiresIn: '7d' },
       );
       res.send({ token });
     })
-    .catch(() => {
-      next(new UnauthorizedError('Неверный email или пароль'));
-    });
+    .catch(() => next(new UnauthorizedError('Неверный email или пароль')));
 };

@@ -1,0 +1,11 @@
+.place__caption {
+    margin: 0px;
+    max-width: 200px;
+    font-weight: 900;
+    font-size: 24px;
+    line-height: 29px;
+    padding: 25px 0px 31px 0px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

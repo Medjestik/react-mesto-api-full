@@ -1,0 +1,11 @@
+.page__rendering_type_loading {
+    margin: 0px;
+    color: #ffffff;
+    font-weight: normal;
+    font-style: normal;
+    font-family: 'Inter', Arial, sans-serif;
+    font-size: 18px;
+    line-height: 1.15;
+    letter-spacing: 2px;
+    text-align: center;
+}

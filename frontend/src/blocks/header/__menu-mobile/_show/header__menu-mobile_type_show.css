@@ -1,0 +1,15 @@
+.header__menu-mobile_type_show {
+    animation: show-menu 0.5s forwards;
+    height: auto;
+}
+
+@keyframes show-menu {
+    from {
+        padding: 0px 0px;
+        height: 0px;
+    }
+    to {
+        padding: 40px 0px;
+        height: auto;
+    }
+}

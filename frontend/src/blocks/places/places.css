@@ -1,0 +1,15 @@
+@import url(__caption/place__caption.css);
+@import url(__card/place__card.css);
+@import url(__container/place__container.css);
+@import url(__img/place__img.css);
+@import url(__info/place__info.css);
+@import url(__likes-container/place__likes-container.css);
+@import url(__like-button/place__like-button.css);
+@import url(__like-caption/place__like-caption.css);
+@import url(__delete-button/place__delete-button.css);
+@import url(__delete-button/place__delete-button_disabled.css);
+@import url(__like-count/place__like-count.css);
+
+.places {
+    margin: 0px;
+}

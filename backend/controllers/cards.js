@@ -41,7 +41,7 @@ module.exports.likeCard = (req, res, next) => {
   const { id } = req.params;
   Card.findByIdAndUpdate(
     id,
-    { $addToSet: { likes: req.user } }, // добавить _id в массив, если его там нет
+    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
     .orFail(new NotFoundError('Карточка не найдена'))
@@ -55,7 +55,7 @@ module.exports.dislikeCard = (req, res, next) => {
   const { id } = req.params;
   Card.findByIdAndUpdate(
     id,
-    { $pull: { likes: req.user } }, // убрать _id из массива
+    { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
     .orFail(new NotFoundError('Карточка не найдена'))

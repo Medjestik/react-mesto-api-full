@@ -37,6 +37,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger);
 
+app.get('/crash-test', () => {
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
+
 app.post('/signin', validateUserData, login);
 app.post('/signup', validateUserData, createUser);
 
@@ -48,12 +54,6 @@ app.all('*', (req, res, next) => {
 });
 
 app.use(errorLogger);
-
-app.get('/crash-test', () => {
-  setTimeout(() => {
-    throw new Error('Сервер сейчас упадёт');
-  }, 0);
-});
 
 app.use(errors());
 

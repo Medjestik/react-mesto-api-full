@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err.js');
 const UnauthorizedError = require('../errors/unauthorized-error.js');
+const ConflictError = require('../errors/conflict-request-err.js');
 
 module.exports.getUsers = (req, res, next) => {
   User.find({})
@@ -25,7 +26,7 @@ module.exports.getUserByToken = (req, res, next) => {
     .catch(next);
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -38,20 +39,13 @@ module.exports.createUser = (req, res) => {
         email,
         password: hash,
       })
-        .then((user) => {
-          res
-            .status(200)
-            .send({ data: user });
-        })
+        .then((user) => res.send(user))
         .catch((err) => {
-          if (err.name === 'ValidationError') {
-            return res
-              .status(400)
-              .send({ message: 'Некорректные данные' });
+          if (err.name === 'MongoError' && err.code === 11000) {
+            next(new ConflictError('Пользователь с такой почтой уже есть в базе'));
+          } else {
+            next(err);
           }
-          return res
-            .status(500)
-            .send({ message: 'Internal Server Error' });
         });
     });
 };

@@ -41,12 +41,12 @@ module.exports.likeCard = (req, res, next) => {
   const { id } = req.params;
   Card.findByIdAndUpdate(
     id,
-    { $addToSet: { likes: req.user } }, // добавить _id в массив, если его там нет
+    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
     .orFail(new NotFoundError('Карточка не найдена'))
-    .then(() => {
-      res.send(req.user);
+    .then((card) => {
+      res.send(card);
     })
     .catch(next);
 };

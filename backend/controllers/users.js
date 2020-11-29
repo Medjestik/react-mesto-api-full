@@ -60,7 +60,6 @@ module.exports.editProfile = (req, res, next) => {
   }, {
     new: true,
     runValidators: true,
-    upsert: true,
   })
     .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => res.send(user))
@@ -77,7 +76,6 @@ module.exports.editAvatar = (req, res, next) => {
   }, {
     new: true,
     runValidators: true,
-    upsert: true,
   })
     .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => res.send(user))

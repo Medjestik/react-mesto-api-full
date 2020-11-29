@@ -47,6 +47,7 @@ module.exports.likeCard = (req, res, next) => {
     .orFail(new NotFoundError('Карточка не найдена'))
     .then((card) => {
       res.send(card);
+      res.send(req.user);
     })
     .catch(next);
 };

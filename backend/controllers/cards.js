@@ -41,14 +41,7 @@ module.exports.likeCard = (req, res, next) => {
   const { id } = req.params;
   Card.findByIdAndUpdate(
     id,
-    {
-      $addToSet: {
-        likes: {
-          id: req.user._id,
-          name: req.user.name,
-        },
-      },
-    }, // добавить _id в массив, если его там нет
+    { $addToSet: { likes: req.user } }, // добавить _id в массив, если его там нет
     { new: true },
   )
     .orFail(new NotFoundError('Карточка не найдена'))
